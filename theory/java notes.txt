@@ -1,0 +1,371 @@
+=> 화살표 함수
+
+id ="order", id="word"
+# 선택자
+const $span //명칭 $ 버튼등일때 보기좋게
+
+
+
+ const greeting = {  //객체 타입 변수 선언에는 const를 사용하는 것이 좋다.
+        message: "say Hi",
+        times: 4
+    }
+
+const p1 = axios.get('서버주소1')
+const p2 = axios.get('서버주소1')
+const p3 = axios.get('서버주소1')
+const p4 = axios.get('서버주소1')
+const p5 = axios.get('서버주소1')
+const p6 = axios.get('서버주소1')
+
+Promise.all([p1,p2,p3,p4,p5,p6]).then((results) => {}).catch((error)=>{}); //결과값을 원할때 받을 수 있다. 
+//Promise.all은 하나라도 실패하면 모두실패  여기서 catch는 전체 Promise.all([p1,p2,p3,p4,p5,p6]).then((results) => {})에 대한 캐치이다.
+Promise.allSettled([p1,p2,p3,p4,p5,p6]).then((results) => {
+    //실패한 것만 필터링해서 다시 시도 
+}).catch((error)=>{}).finally(() => {});
+
+try{}catch(err){}finally{}
+
+
+콜백이었다면 결과값을 바로 받아야하는데 
+
+
+//한번 비동기는 영원한 비동기
+//비동기는 동시의 문제가 아니다 . 순서의 문제다 
+
+//비동기는 백그라운드에 들어간다
+
+promise, process, nextick -> micro , 나머지는 매크로
+
+백그라운드에서 -> 매크로,마이크로로 보내줌
+
+매크로,마이크로 -> 마이크로가 먼저 우선순위가 높아서 먼저 실행된다
+
+//promise 란, 실행은 바로하되, 결괏값을 나중에 원할때 쓸 수 있는것
+
+=================
+const p = new Promise({resolve, reject} => {
+    //setTimeout이부분은 동기이다. 여기가 먼저 실행되고 1 ()=>함수가 실행되고 2 const p = new Promise p에 대입되고 3 다음라인으로간다.
+    setTimeout(() => {
+        a = 5;
+        console.log(a);
+        resolve(a);
+    },0)
+});
+
+//딴짓
+p.then((result) => {
+    console.log('result',result);
+});
+
+백그라운드 setTimeout, p.then 쌓임 -> promise니까 마이크로 -> settimeout 호출스택 비었나 확인하고 -> p.then 호출되고 
+호출스택,bg,m,m 다 비워져야 모든 동작이 끝난것임 자바스크립트에서는 
+=================
+p.then.((result) =>{
+    console.log('result',result);
+    return Promise.resolve(1);
+}).then((result) =>{
+    //에러로 이동
+    console.log(result);
+    return undefined;
+}).then((result)=>{
+    console.log(result);//undefined
+    //에러났따.
+}).catch(()=>{
+    //에러로이동
+}).then((=>{
+    
+})).catch(()=>{
+
+}).then((=>{
+
+})).catch(()=>{
+
+}).then(()=>{
+
+}).finally(()=>{
+
+});
+
+
+
+async function a(){
+    try{
+        await delayP(1000);
+    }catch(error){
+        console.error(error);
+    }
+
+    try{
+        await delayP(1000);
+        await delayP(1000);
+        await delayP(1000);
+        
+    }catch(error){
+        console.error(error);
+    }
+}
+
+=================================
+async function a(){
+    const a = await 1; //await 한 값이 들어감       //await -> then 이라고 생각
+    console.log('a',a);
+    console.log('hmm');
+    await null;
+    const b = await Promise.resolve(1); /promise 는 resolve한값이 들어감
+    console.log('b',b);
+
+    return b;
+}
+
+
+
+
+promise.resolve(1)
+    .then((a)=>{
+         console.log('a',a);
+        console.log('hmm');
+        return null;
+    })
+    .then(()=>{
+        return promise.resolve(1);
+    })
+    .then((b)=>{
+        console.log('b',b);
+        return b;
+
+    });
+
+
+
+=================================
+function delayP(ms){
+    return new Promise((resolve,reject) =>{ //이함수가 동기함수이다. promise 비동기의 동기부분 
+        settimeout(resolve,ms);
+    });
+};
+
+async function a(){
+     console.log('2'); //동기부분이 있다. await 전 
+    const a = await 1; // await ->then await은 전부다 비동기다. promise가 아닌것await은 자동으로 넘어가고
+    console.log('4'); //비동기부분
+    //async 함수는 첫번째 await 전에 끝난다. 동기부분이   const a = await 1; / 에서 끝난다.
+    console.log('a',a);
+    console.log('hmn');
+    await null;
+    const b = await promise.resolve(1); //promise 는 resolve 해서 넘어가고 
+    console.log('b',b);
+    return a + b;
+}
+ console.log('1');
+ //비동기부분
+ a().then((result) =>{
+    console.log(result);
+}).then((result2)=>{
+    console.log(result2);
+});
+ console.log('3');
+
+
+
+//1234순으로 나옴 
+
+///위코드해석
+promise(1)bg->m->cs 
+promise(null)->bg->ms->cs
+pro
+
+//async 함수는 첫번째 await 전에 끝난다. 동기부분이   const a = await 1; / 에서 끝난다.
+
+//promise.resolve(1)
+//    .then((a)=>{
+//         console.log('a',a);
+//        console.log('hmm');
+//        return null;
+//   })
+//    .then(()=>{
+//        return promise.resolve(1);
+//    })
+//    .then((b)=>{
+//       console.log('b',b);
+//        return b;
+//
+//    });
+
+promise.resolve(1)
+    .then((a)=>{
+         console.log('a',a);
+        console.log('hmm');
+        return null;
+   })
+    .then(()=>{
+        return promise.resolve(1);
+    })
+    .then((b)=>{
+       console.log('b',b);
+        return b;
+
+    })
+    .then((result)=>{
+        console.log(result);
+    })
+    .then((result2)=>{
+        console.log(result2);
+    })
+
+
+
+
+
+
+
+
+=================================
+function delayP(ms){
+    return new Promise((resolve,reject)=>{ //함수안이 동기이니까 실행은바로됨. =>결괏값은 나중에 resolve가 되는순간 결과값이나옴-> 결괏값을 사용할때는 더나중 then일때.
+        setTimeout(resolve,ms);
+    });
+};
+
+async function a(){
+    await delayP(3000);
+    await delayP(6000);
+    await delayP(9000);
+    
+}//토탈 18초
+async function b(){
+    const p1 = await delayP(3000);
+    const p2 = await delayP(6000);
+    await promise.all([p1,p2]);//6초        async에서도 promise를 쓰는때가 있다.
+    await delayP(9000);//9초
+    
+}//토탈 15초
+
+->바꾸기
+new Promise((resolve,reject) =>{
+    const p1 = delayP(3000); // 3초
+    const p2 = delayP(6000); // 6초
+    return promise.all([p1,p2]);
+})
+    .then(() =>{
+        return delayP(9000);
+    })
+
+
+async function c(){
+    const a = await 1;
+    const b = await 2;
+    return a + b ;
+}
+
+promise.resolve(1)
+    .then((a)=>{
+        return 2;
+    })
+    .then((b)=>{
+        return a + b;
+    });
+
+
+
+async createPost(){
+    await pos = await db.getpost(); //게시물 조회
+    if(post){
+        res.status(403).send('이미 게시글이 존재합니다.');
+    }else{
+        await db.createPost(); // 게시글 작성
+        
+        const p1 = db.userIncreamentPostcunt(); // 사용자에 작성글 카운트 1 올림
+        const p2 = db.createNoti(); 새로운 게시글 알림 등록
+        await Promise.allSettled([p1,p2]); //2개동시에 해서 더빠름.
+
+    }
+
+}
+
+
+
+//실행은 바로 --> 결괏값도 거의 바로 쓰고싶은데 ---> 그, 다음에 결괏값이 나오면 ---> then, await, promise.all 이런게 결괏값을 기다린 후에 실행된다.
+
+
+
+=================================
+const results = await promise.all([p1,p2,p3])
+result.map(async()=>{
+    await result조작(); //p1,p2,p3 조작 동시에 호출스택에서 순서대로 처리 
+},[]);
+
+for(let result of results){
+    await result조작(); //p1 끝난 후 p2 끝난 후, p3
+}
+
+
+=================================
+//클로저 문제 -> 스코프, 비동기 ,var(쓰레기)
+//클로저가 문제다 x
+//클로저를 사용해서 해결하는 문제
+//for 문(반복문)과 비동기를 함께 사용하면 종종 발생
+
+
+// 문제 : var와 for와 비동기의 환상의 콜라보
+//해결법: var 유지->즉시실행함수로 클로저 생성
+//해결법: var -> let으로
+function a(){  
+    for(var i = 0; i < 5; i++){
+        settimeout(()=>{
+            console.log(i);
+        },i*1000);
+    }
+}
+a();
+//5 ,5,5,5,5()=>함수가 전부 5를 가리킴
+
+function a(){  
+    for(var i = 0; i < 5; i++){
+        (function(j){
+            var j = i;
+            settimeout(()=>{
+                console.log(j);
+            },i*1000);
+        })(i);
+    }
+}
+a();
+
+function a(){  
+    for(let i = 0; i < 5; i++){
+        settimeout(()=>{
+            console.log(i);
+        },i*1000);
+    }
+}
+a();
+
+//function a 스코프는 1개고 , for문의 스코프는 5개 
+//var 의 스코프는 a 이고 let은 for문에 속함.
+//클로저: 함수와 함수외부 변수와의 관계 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

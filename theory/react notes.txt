@@ -1,0 +1,230 @@
+https://github.com/zeroCho/react-webgame
+
+state = data
+화면바뀌는 부분을 state로 만든다.
+render 화면
+데이터가 바뀌면 화면이 바뀐다.
+
+if문 -> 삼항연산자 사용
+{this.state.liked ? 'Liked' : 'Like!'}
+
+배열반복
+{[1,2,3].map((i) => {
+    return <div>i</div>;
+})}
+
+
+객체를 함부로 바꾸지 마라 (불변성)
+const array = []; //배열도 객체입니다.
+함수도 객체다.
+복사해라 바꾸지 말고.
+this.setstate를 대신사용하기..
+
+function LikeButton(){ //함수 컴포넌트
+    //this 쓸 일이 없다. 
+    const [liked,setLiked] = React.useState(false); //구조분해 데이터 ,함수로 세트로 제공 [배열]
+    const [news,setNews] = React.useState(['뉴스1','뉴스2','뉴스3','뉴스4']);
+
+    
+    //const {liked,setLiked} //{}이것은 객체다.
+    //뭔짓을 하든, 결국 return 한게 화면이다.
+    if(liked){
+        return 'You liked this.';
+    }
+    return (
+        <button onClick={()=>{setLiked(true);}}>Like</button>
+
+    );
+}
+
+직접만들어준 함수들은 화살표함수 써야한다. this가 달라지기 때문에
+
+this.setstate를 할때 render 함수가 실행된다.
+
+dom에접근 할때 hook 에서는 useRef로 접근 current 를 한번더 붙여주면된다.
+
+
+17강까지 React 기본 강좌 2-6. 구구단 웹팩으로 빌드하기
+
+
+
+바뀌는것은 state이다.
+
+value 랑 onchange 는 세트이다. 아니면 defaultvalue로.
+onchange는 화살표함수로 적어줘야한다.
+
+반복문 :
+{['like','like','like','like','like'].map((v)=>{
+	return(
+		<li>{v}</li> //공통된부분 ..
+	);
+
+})}
+
+============================================
+props 다른파일의 변수를 받아옴. props를 하면 부모자식관계가 생김.
+()=> 화살표함수: bind(this)를 자동으로 해줌
+React 기본 강좌 3-6. 숫자야구 만들기 할차례
+
+tries:[] 배열 setstate할때 
+tries: [...this.state.tries, {try: this.state.value, result :'홈런!'}], // 현재배열을 먼저넣어주고 더해줄것을 추가한다. push쓰면안됨([]안에값넣기 x)
+
+this.setstate((prevState)=>{
+    return{
+        result:'홈런!',
+        tries: [...prevState.tries, {try:value, result:'홈런!'}]  //옛날state로 현재 state를 만들때는
+        //함수형 setstate를 써야한다 그래서 setstate연달아쓸떄 문제가 안생긴다.!!
+    }
+})
+
+lazy init 함수값을 돌려주지않고 함수만 한번 부르기 계속 render 되기때문에
+
+
+render()안에는 절대 setstate쓰는거 아니다 무한반복됨
+
+render()안에서는 for, if 를 못쓴다 -> 삼항연산자 사용
+
+구조분해: const{state, message, result} = this.state;
+ 
+componentDidMount(){ //컴포넌트가 첫 렌더링된 후 , 여기에 비동기 요청을 많이 함.
+}
+componentDidUpdate(){ //리렌더링 후   
+}
+componentWillUnmount(){// 컴포넌트가 제거되기 직전   , 비동기 요청 정리를 많이함.
+}
+
+
+//클래스의 경우 -> constructor -> render -> ref > componentDidMount
+//->(setState/props 바뀔때 -> shouldComponentUpdate(true) -> render -> componentDidUpdate)
+//부모가 나를 없앴을 때 -> componentWillUnmount -> 소멸
+
+클로저문제 : 비동기함수 안에서 바깥에 변수 참조
+
+고차함수: 함수를 연달아씀 onClickBtn = (choice) => (e) =>{}
+
+
+useEffect(()=> { // componentDidMount, componentDidUpdate 역할 (1대1 대응은 아님)
+    interval.current = setInterval(ChangeHand, 100);
+    return ()=>{ //componentWillUnmount 역할
+        clearInterval(interval.current);
+    }
+},[]); //[]안에다 useEffect를 실행하고싶은 state를 넣어준다.
+
+===========================================
+const [isRunning, setIsRunning] = useState(true);
+
+useInterval(ChangeHand, isRunning ? 100 : null) //커스텀 훅스
+
+===========================================
+function useInterval(callback, delay){
+    const savedCallback = useRef() //항상 최신 callback을 참조하게함.
+
+    useEffect(()=>{
+        savedCallback.current = callback;
+    })
+}
+
+===========================================
+PureComponent는 현재 state, props와 바뀔 state, props를 비교하여 업데이트 여부를 결정하게 되는 것이다.
+ 그렇기 때문에 아래의 코드에서 setState는 실행되었지만, count의 값이 바뀌지 않아 컴포넌트가 업데이트되지 않았다
+
+React.memo는 Memoization(메모이제이션) 기법으로 동작하며, 고차 컴포넌트(Higher Order Component, HOC)이다.
+컴포넌트가 props로 동일한 결과를 렌더링하면, React.memo를 호출하고 결과를 메모이징(Memoizaing) 하도록 래핑하여 경우에 따라 성능 향상을 할 수 있다.
+즉, React는 컴포넌트를 재렌더링하지 않고 마지막으로 렌더링된 결과를 재사용한다.
+props가 이전과 동일한 값이면 재렌더링하지 않고, 다른 값이면 재렌더링하여 컴포넌트를 다시 만들어 반환한다.
+React.memo에 쓰인 컴포넌트 안에서 구현한 state가 변경되면 컴포넌트는 재렌더링이 된다.
+===========================================
+useMemo : 복잡한 함수 결괏값을 기억
+useRef: 일반 값을 기억
+useCallback: 함수를 기억 2번쨰인자가 바뀌기 전까지, 2번째인자가 바뀔때 바뀜
+useMemo, useEffect, useCallback의 2번째 인자가 매우 중요하다. 2번째 인자가 바뀔떄 바뀐다.
+useEffect: 함수 안을 실행한다. 2번째인자가 바뀔때!
+
+
+
+함수마다 console.log()를 넣어서 확인!!
+
+hooks는 조건문안에 절대로 넣으면 안되고 함수나 반복문 안에도 웬만하면 넣지 마세요
+
+
+...state 객체를 새롭게 복사하는것 기존것이 얕은복사가됨
+바뀔부분만 새롭게 바꾸기 winner: action.winner
+
+state를 아무도 직접 수정불가하다
+state 수정하려면 액션을 만들어서 dispatch 해야함
+액션을 reducer 에서 관리
+usereducer란 state 를 관리하고 업데이트 하는 hook 인 useState 를 대체 할 수 있는 hook 입니다.
+
+
+dispatch에서 state바꾸는게 비동기다. 중요!
+usereducer는 state가 비동기적으로 바뀜
+비동기에서 state 처리하려면 useEffect를 써야한다.!!기억
+
+값을기억 useMemo
+함수를기억 callback
+
+
+contextapi
+useContext 란? context는 부모가 자식컴포넌트에게 
+일일이 props를 넘겨주지 않고도 컴포넌트 트리 전체에 데이터를 전달할 수 있게 해준다.
+ useContext는 context를 좀더 편하게 사용할 수 있도록 도와주는 hook이다.
+
+
+
+
+
+
+=================================
+npm i react-router
+npm i react-router-dom 웹에서 쓰는 라이브러리
+package.json 에 기록됨.
+
+<BrowserRouter>
+<Routh path= "페이지들" component={보여줄컴포넌트들}/>
+</BrowserRouter>
+
+localhost/페이지들 이주소로 넘어갈수있는게 필요함
+리액트 라우터는 눈속임이다. 실제 페이지는 존재하지 않는다.
+리액트 라우터만 가상으로 알고있는페이지다.
+a태그쓰면 에러나서 
+Link 라는 리액트 라우터 도메인사용 ->라우터를 부분을 불러주는 역할
+실제로는 페이지가 여러개 있지않음. 새로고침은안됨 서버쪽처리는 안됨.
+프론트엔드에서만 동작한다.
+
+# 해쉬라우터 ->새로고침해도 동작은함. #뒤의부분은 브라우저만 아는부분이다. 서버쪽에서는 모름
+
+
+
+=================================
+
+React Hooks
+React Hooks은 리액트의 새로운 기능으로 React 16.8버전에 새로 추가된 기능으로 state, component에 대한 것들을 바꿔놓았다.
+
+예를 들면 function component에서 state을 가질 수 있게 된 것
+
+만일 앱을 react hook을 사용하여 만든다면 class component, render 등을 안해도 된다는 뜻이다.
+
+모든 것은 하나의 function이 되는 것 함수형 프로그래밍이 가능해지는 것
+
+=================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

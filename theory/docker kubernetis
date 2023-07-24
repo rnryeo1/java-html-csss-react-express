@@ -1,0 +1,869 @@
+docker ps
+docker stop
+docker 1429ab2a1543
+docker ps -a 
+docker start 
+docker ps -a 모든
+docker run -d -p //detach port 
+
+container port vs host port 
+container port 는 같은것을 써도됨
+host port는 다른것을 써야함. 
+
+docker run -p6000:6379
+docker run -p6001:6379 redis:4.0
+2가지 다른버젼의 redis를 띄운것.
+80:80 = [호스트의 포트] : [컨테이너의 포트]
+포트바인딩 :**컨테이너내부 애플리케이션을 외부에 노출하기 위해서는 eth0의 IP와 포트를 호스트의 IP와 포트에 바인딩해야 한다.
+
+clear : cmd창 다지움
+
+docker exec -it container id /bin/bash
+ls
+pwd
+cd /
+ls 
+env
+exit
+
+====================================
+docker on os level
+different levels of abstraction
+why linux-based docker containers don't run on windows
+
+operation systems have 2 layers
+applications 2.layer 
+os kernel 1. layer  
+hardware 
+
+====================================
+docker hub -> developing js app -> git -> cl(jenkins..) builds js app & creates docker image -> push docker repository-> dev server pulls both images
+====================================
+docker network
+
+docker network create mongo-network
+
+docker run -p 27017:27017 -d -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=password --name mongodb --net mongo-network mongo
+docker logs 05e591dd8ea1e2b83fdee948ea119ba1232db130278fa392a785c15802fd2bc8
+
+docker run -d -p 8081:8081 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin -e ME_CONFIG_MONGODB_ADMINPASSWORD --net mongo-network --name mongo-express -e ME_CONFIG_MONGODB_SERVER=mongodb mongo-express
+
+mongo db , and mongo-express 컨네이너이름으로만 소통한다. 같은네트워크에 있어서 .
+nodejs 밖의 호스트가 포트로 mongodb에 연결한다.
+
+호스트안에 고립된 docker network가 있는데 거기에 nodejs,mongodb,mongo-express를 
+
+이모음들을 브라우저는 호스트네임과 PORT번호로 접근한다.
+
+-detach monde (-d)
+Docker 컨테이너(container)는 격리된 환경에서 돌아가기 때문에 기본적으로 다른 컨테이너와의 통신이 불가능합니다. 
+하지만 여러 개의 컨테이너를 하나의 Docker 네트워크(network)에 연결시키면 서로 통신이 가능해집니다. 
+
+docker-compose
+ Docker compose란, 여러 개의 컨테이너로부터 이루어진 서비스를 구축, 실행하는 순서를 자동으로 하여, 관리를 간단히하는 기능이다.
+
+ Docker compose에서는 compose 파일을 준비하여 커맨드를 1회 실행하는 것으로, 그 파일로부터 설정을 읽어들여 모든 컨테이너 서비스를 실행시키는 것이 가능하다.
+
+docker file 
+DockerFile 이란? Docker Image를 생성하기 위한 설정 파일입니다. 파일 내 작성된 구문으로 Docker Image가 만들어집니다.
+
+1.install node
+->FROM node 
+app including dockerfile is commited to git -> jankins builds image form that dockerfile ->push docker repository -> dev server
+
+when you adjust the dockerfile you must rebuild the image
+
+FROM node:13-alpine
+
+ENV MONGO_DB_USERNAME=admin \
+    MONGO_DB_PWD=password
+
+RUN mkdir -p /home/app
+COPY ./app /home/app
+CMD ["node, "/home/app/server.js"]
+
+docker exec -it container id /bin/bash
+
+docker exec -it container id /bin/sh
+ls
+env  설정볼수있다. 도커파일  
+ls /home/app 
+docker build -t my-app:1.0 . 
+==================================================
+Private Repository explained
+
+ecr 
+you save different tags or versions of the same image
+
+이미지를 저장소에 넣기
+you always have to login to the private repo!
+aws 로그인커맨드를 친다 ->  
+1. aws cli needs to be installed
+2. credentials configured
+
+jenkins also needs to login to your private docker repository
+
+로그인-> 빌드 도커이미지->docker tag 명령어들 -> docker push ->aws에 이미지 저장됨
+
+
+==================================================
+Deploying the containerized application with Docker Compose 
+
+image from a private repository
+aws ecr
+deploy multiple containers 
+deployment server
+
+my-app image pulled from private repository
+mongo images pulled from public dodker hub
+
+the server needs to login to pull from private repository
+
+호스트포트 ,컨테이너포트 설정
+
+this docker-compose file would be used on the server to deploy all the applications/services
+
+==================================================
+when do we need docker volumes?
+data is gone! ... when restarting or removing the container
+
+folder in physical host file system is mounted into the virtual file system of docker!
+
+volume
+-mongo-data:
+    driver: local
+    1)host-volumne-name
+    2)path-inside-of-the-container
+
+mysql: var/lib/mysql
+postgres:var/lib/postgresql/data
+
+docker for mac create a linux virtual machine and stores all the docker data here
+
+bash란? sh와 대부분 호환 됩니다.
+프롬프트: #
+==================================================
+pod
+-smallest unit of k8s
+-abstraction over container
+-usually 1 application per pod 
+-each pod gets its own ip address
+-new ip address on re-creation
+service : 
+-permanent ip address
+
+ex) pod: my-app / container
+
+database url usually in the built application!
+
+원래 re-build ->push it to repo -> pod->귀찮은과정 
+
+k8s는 제공한다
+configmap을
+-external configuration of your application
+secret:
+-used to store secret data
+-base64 encoded
+
+volume : 데이터 영구저장용
+k8s doesn't manage data persistance
+
+node를 복제 
+the replica is connected to the same service 
+service is a load balancer
+
+deployment:
+-blueprint for my-app pods
+-abstraction of pods 
+
+DB can't be replicated via deployment
+
+deployment for stateless apps 
+
+statefulsset for stateful apps or databases
+
+DB are often hosted outside of the k8s cluster
+
+-each node has multiple pods on it
+-3 processes must be installed on every node
+-worker nodes do the actual work
+
+kubelet interacts with both -the container and node
+kublet starts the pod with a container inside 
+
+communication via services
+
+kube proxy forwards the requests
+
+node processes:
+1.kubelet
+2.kube proxy
+3: container runtime
+
+master processes
+-api server는 cluster gateway 이다.
+-acts as a gatekeeper for authentication
+
+schedule new pod -> api server -> scheduler -> where to put the pod?
+schduler just decides on which node new pod should be scheduled 
+
+controll manager 
+-detects cluster state changes
+controll manager->scheduler->kubelet->
+
+etcd
+-etcd is the cluster brain!
+-cluster changes get stored in the key value store
+
+add new master/node server 
+1) get new bare server
+2) install all the master/worker node processes
+3) add it to the cluster
+
+master구성: api server, scheduler, controll manager, etcd
+node구성: 여러 pod 들
+
+
+
+==================================================
+high availability and scalability
+
+https://my-app.com -> ingress -> my-app service -> db service 
+service is a load balancer
+-every component is replicated 
+-load balanced
+-no bottleneck that slows down the responses
+nonetheless you need a properly designed application
+
+controller manager schedules new replicas
+
+etcd stores the cluster state at any given time
+
+advangages of k8s
+-replication is much easier
+-self-healing of k8s
+-smart scheduling
+
+
+==================================================
+production cluster setup
+
+-multiple master and worker nodes
+-separate virtual or physical machines
+
+minikube : master and node processes run on one machine
+-creates virtual box on your laptop
+-node runs in that virtual box
+-1 node k8s cluster
+-for testing purposes
+
+what is kubectl?
+master processes 
+-enable interaction with cluster
+api server -> ui, api , cli 
+KUBECTL (the most powerful of 3 clients)
+worker processes(enable pods to run on node)
+
+==================================================
+kubectl 명령어
+kubectl get nodes
+kubectl get pod
+kubectl get services
+kubectl create -h
+
+pod is the smallest unit
+but, you are creating 
+deployment - abstraction over pods
+
+kubectl create deployment nginx-depl --image=nginx
+kubectl get deployment
+
+-blueprint for creating pods
+-most basic configuration for deployment (name and image to use)
+-rest defaults
+kubectl get replicaset
+
+replicaset is managing the replicas of a pod
+
+layers of abstration
+-depolyment manages a
+-replicaset manages a
+-pod is an abstraction of 
+kubectl edit deployment [name]
+
+kubectl logs [pod name]  // log to console
+kubectl create deployment mongo-depl --image=mongo
+kubectl describe pod[pod name]
+
+kubectl exec it[pod name] --bin/bash // it(interact) get interative terminal
+kubectl delete deployment[name]
+kubectl apply -f[file name]
+kubectl delete -f[file name]
+
+==================================================
+yaml configuration file in kubernetes
+
+-the 3 parts of configuration file 
+1. metadata
+2. specification
+3. status (automatically)
+etcd holds the current status of any k8s component
+
+-connecting deployments to service to pods
+-demo
+
+yaml configuration file
+-"human friendly data serialization standard for all programming languages
+-syntax: strict indentation
+-store the config file with your code or own git repository
+
+deployment manage pods
+-has it's own "metadata" and "spec" section
+-applies to pod
+-blueprint for a pod 
+
+labels & selectors
+
+connecting deployment to pods
+-any key-value pair for component
+-pods get the label through the template blueprint
+-this label is matched by the selector 
+
+connecting services to deployments 
+
+ports in service and pod 
+db service -> port:80 nginx service -> targetPort:8080 pod
+
+kubectl describe service nginx-service
+
+kubectl get pod -o wide  // endpoint 알수있음
+
+
+==================================================
+overview of k8s components 
+internal service(pod)
+mongodb 
+configmap (db url)
+secret (db user db pwd)
+
+deployment.yaml(env variables) 
+pod (mongo express)
+external service(url: ip address of node -port of external service)
+
+mongo express -> mongo express(pod) -> mongo db internal service -> mongo db -> secret db user db pwd 
+-> configmap 
+
+pod 에 많은수의 port를 연결하려고 ports : 
+
+configmap 
+-external configuration
+-centralized
+-other compoenents can use it 
+
+how to make it an external service?
+-type : "LoadBalancer"
+..assign service an external IP address and so accepts external requests 
+-nodePort: must be between 30000~32767
+
+kubectl apply -f mongo-express.yaml
+kubectl get service 
+
+internal service or cluster ip is default 
+LoadBalancer assigns in addition an external-ip 
+
+8081:30000/(port(s)) external-ip 있을경우
+27017/TCP/(port(s))   external-ip 없을경우 internal만 있을경우.
+
+mongo express external service->mongo express pod -> mongo db internal service -> mongo db pod 
+
+==================================================
+Kubernetes Namespaces Explained
+-organise resources in Namespaces
+-virtual cluster inside a cluster 
+
+ns안에(deploy, ing , pod) 여러개의 ns...
+kube-system이란
+-do not create or modify in kube-system
+-systsm processes
+-master and kubectl processes
+
+kube-public 이란
+-publicely accessible data
+-a configmap, which contains cluster information
+
+kube-node-lease란 
+-heartbeats of nodes 
+-each node has associated lease object in namespace 
+-determines the availability of a node 
+
+Namespaces란 
+-cluster inside a cluster 
+-default Namespaces
+
+왜쓰는가?
+1.resources grouped in Namespaces
+2.conflicts: many teams, same application
+3.resources sharing: staging and development , blue/green deployment 
+4. access and resource limits on namespaces 
+
+Use cases when to use Namespaces
+1.structrue your compoenents
+2.avoid conflicts between teams
+3.share services between different environments
+4.access and resource limits on namespaces level 
+
+you can''t access most resources from another namespace
+each Namespaces must define own configmap 
+
+compoenents, which can''t be created within a namespace
+-live globally in a cluster 
+-you can''t isolate them
+
+
+==================================================
+Kubernetes Ingress Tutorial for Beginners 
+routing rules:
+forward request to the internal service
+
+host:
+-valid domain address
+-map domain name to node''s ip address, which is the entrypoint 
+
+what is ingress controller 
+-evaluates all the rules 
+-manages redirections 
+-entrypoint to cluster 
+-many third-party implementations 
+-k8s nginx ingress controller 
+
+you need to configure some kind of entrypoint 
+either inside of cluster or outside as separate server 
+
+-separate server 
+-public ip address and open ports 
+-entrypoint to cluster 
+-no server in k8s cluster is accessible from outside! 
+
+
+
+==================================================
+Pods and Containers
+-why is a pod abstraction useful?
+-container vs pods 
+-when are multiple containers necessary?
+-how do containers communicate in a pod? 
+
+pod이란?
+every pod has a unique ip address
+-ip address reachable from all other pods in the k8s cluster 
+-how to allocate ports without getting conflicts ?
+
+container port mapping without pods 
+-bind host port to apllication port in container: 5000(host):5432(pod inside container)
+
+pod abstraction
+-own ip address 
+-usually with one main container 
+
+pod 은 network namespace를 가지고 있다.
+-own network namespace
+-virtual ethernet connection 
+-pod is a host (ip address range of ports to allocate )
+-each container has its own ports 
+-only 1 main container 
+-container port = port where the application inside the container runs 
+-replacing container runtime easily (docker로)
+
+multiple containers in a pod 
+-helper or side application to your main application
+-called "side-car" container 
+
+pod 은 고립된 가상 host 로써 network namespace가 안에 있다.
+이것이 의미하는것은 
+-> containers can talk via localhost and port 
+
+kubectl get pod 
+kubectl exec -it nginx -c sidecar -- /bash/sh
+netstat -ln 
+curl localhost:80
+kubectl logs nginx -c nginx-container 
+echo $(minikube docker-env)
+kubectl describe pod nginx 
+
+pause container 
+-"pause" container in each pod 
+-also called "sandbox" container 
+-reserves and holds network namespace(netns)
+-enables communication between containers 
+
+kubernetes networking 
+pod communication, container communication, outside with k8s cluster, 
+how k8s plug into underlying network , docker container networking 등이있다.
+
+==================================================
+Kubernetes Volumes explained 
+
+my-app -> mysql (databse user)
+
+1.storage that doesn''t depend on the pod lifecycle 
+2.storage must be available on all nodes 
+3.storage needs to survive even if cluster crashes
+
+persistent volume 
+-a cluster resource 
+-created via yaml file 
+
+local vs remote volume types 
+-each volume type has it''s own use case!
+local volme types violate 2, and ,3 requirement for data persistence 
+for DB persistence use remote storage 
+
+who creates the persistent volumes and when?
+PV are resources that need to be there before . ..
+
+k8s admin sets up and maintains the cluster 
+k8s user deploys applications in cluster 
+
+storage resource is provisioned by admin 
+create the PV compoenents from these storage backends 
+application has to claim the persistence volume 
+
+-pod requests the volume through the PV claim 
+-claim tries to find a volume in cluster 
+-volume has the actual storage backend 
+-claims must be in the same namespace ! 
+볼륨이 container로 mount 되고 -> pod에 마운트된다.
+
+-volume is directory with some data 
+-these volumes are accisible in containers in a pod 
+-how mad available, backed by which storage medium 
+-defined by specific volume types 
+
+storage class 
+-sc privisions persistent volumes dynamically when persistentVolumeClaim claims it
+-storagebackend is defined in the sc compoennt 
+-via "provisioner" attribute 
+-each storage backend has own provisioner 
+-internal provisioner - "kubernetes.io"
+-external provisioner 
+-configure prarameters for storage we want to request for PV 
+-Another abstraction level
+-abstracts underlying storage provider 
+-prarameters for that storage 
+
+1) pod claims storage vid PVC 
+2) PVC request storage from sc 
+3) sc creates pv that meets the needs of the claim 
+
+
+==================================================
+Docker vs Kubernetes vs Docker Swarm
+
+docker
+-containers, isolated environment for application 
+-automated building and deploying applications - CI 
+-container platform for configuring, building and distributing containers
+
+kubernetes
+-infrastructure for managing multiple containers 
+-automated scheduling and management of application containers 
+(after container deployment)
+-ecosystem for managing a cluster of docker containers 
+
+docker and kubernetes in the software development process 
+-develop with docker containers -> CI build docker image ->push private docker registry 
+
+-> kubernetes cluster 
+-cubernetes engine ->deployment servers 
+each k8s node has 1 kubelet installed 
+
+docker swarm is also a container orchestration tool 
+docker daemons instead of kubelets
+
+kubernetes
+-complex installation 
+-more complex with a high learning curve, but more powerful 
+-supports auto-scaling 
+-built in monitoring 
+-manual setup of load balancer 
+-need for a separate CLI tool 
+
+docker swarm 
+-easier installation 
+-more lightweight and easier to use, but limited functionality 
+-manual scaling 
+-needs third party tools for monitoring 
+-auto load balancing 
+-integrates docker CLI 
+
+==================================================
+Kubernetes ConfigMap and Secret as Kubernetes Volumes
+-Volumes mounted into the pod 
+-mount volumes into container 
+
+kubectl exec -it mosquitto-6856f4f87-7tvnk -- /bin/sh (bash안될때 sh )
+==================================================
+Pull Image from Private Docker Registry in Kubernetes cluster
+
+common workflow for your app 
+commit-> triggers CI build -> jenkins(packages application)-> pushed to registry -> private registry  
+
+how to get docker image on kubernetes cluster ? 
+
+public docker repository like docker hub 
+1.create secret component 
+(containes credentials for docker registry)
+2.configure deployment/pod 
+(use secret using imagepullsecrets)
+
+-private docker repo hosted on AWS
+-simple Node.js application
+
+1.create secret component 
+kubectl create secret 
+2.configure deployment/pod 
+
+
+==================================================
+Kubernetes StatefulSet simply explained 
+
+stateful applications 
+-examples of stateful applications: databases, elasticsearch, mongoDB 
+applications that stores data 
+
+stateless applications 
+-don''t keep record of state 
+-each request is completely new 
+
+doesn''t depend on previous data 
+passthrough for data query/update 
+
+update data based on previous state 
+depends on most up-to-date data/state
+
+stateless applications deployed using deplyment 
+
+stateful applications deployed using statefulset 
+
+replicating stateful applications is more difficult 
+-other requirements 
+
+deployment vs statefulset 
+-identical and interchangable 
+-created in random order with random hashes 
+-one service that load balances to any pod 
+
+pod identity 
+-sticky identity for each pod 
+-created from same specification, but not interchangable!
+-persistent identifier across any re-scheduling 
+
+1)LoadBalancer service 
+2) individual service name 
+
+1)predictable pod name 
+2)fixed individual DNS name 
+when pod restarts: 
+-ip address changes 
+-name and endpoint stays same 
+
+sticky identiy 
+retain state 
+retain role 
+
+replicating stateful applies
+-it''s complex 
+-k8s helps you 
+-you still need to do a lot : 
+-configuring the cloning and datat synchronization 
+-managing and bakck-up 
+
+stateful application not perfect for containerized environments 
+
+
+==================================================
+Setup Prometheus Monitoring on Kubernetes using Helm and Prometheus Operator 
+
+recap- prometheus architecture 
+-prometheus server processes and stores metrics data 
+-alertmanager: send alerts 
+
+retrieval ->            storage <-              http server             -> push alerts  ->alertmanager->email, slack, etc. 
+(pulls metrics data )   (stores metrics data )  (accepts queries)
+
+how to deploy the different parts in kubernetes cluster ?
+1.creting all configuration yaml files yourself and execute them in right order 
+2.using an Operator (manager of all prometheus components)
+    ...manages the combination of all components as one unit 
+    1)find prometheus operator 
+    2)deploy in k8s cluster 
+3.using helm chart to deploy operator 
+
+1.daemon set 
+node exporter daemonset 
+-connects to server 
+-translates worker node metrics to prometheus metrics 
+
+pods 
+-from deployments and statefulsets 
+
+services 
+-each compoenents has own 
+
+monitoring stack 
+configuration for your k8s cluster 
+worker nodes monitored 
+k8s components monitored 
+
+comfigmaps 
+-configurations for different parts 
+-managed by operator 
+
+secrets 
+-for grafana 
+-for prometheus 
+-for operator 
+certificates 
+username & password 
+
+crds
+-custom resource definitions 
+
+kubectl get statefulset 
+kubectl describe =container/image information
+
+mounts = where prometheus gets its configuration data 
+    mounted into prometheus pod 
+
+
+clusterIP = internal service 
+kubectl get service 
+kubectl get deplyment
+kubectl get pod 
+kubectl log id
+kubectl port-forward deployment/prometheus-grafana 3000 
+==================================================
+kubernetes operator explained 
+...used for stateful applications
+1.stateless apllication on k8s 
+-no backups necessary for stateless apps 
+-no control necessary, after app is deployed 
+-controll loop , obeserve ->check differences ->take action 
+-restart updated pods
+-recreate died pods 
+
+2.stateful applications without operator
+-more "hand-holding " needed 
+-throughout whole lifecycle 
+-all 3 replicas are different 
+-own state and identity 
+-order important 
+
+3.stateful applications with operator
+-how to deploy the app?
+-how to create cluster of replicas?
+-how to recover ?
+
+managing complete lifecycle of stateless apps 
+-no business logic necessary to: 
+
+k8s can''t automate the process natively for stateful apps 
+operators -> prometheus-operator, mysql-operator, postgres-operator ,elasticsearch-operator
+
+kubernetes services 
+-what is a kubernetes service and when we need it 
+-different service types 
+-cluserIP services
+ default type 이다.
+ microservice app deployed 
+ side-car container 
+ collects microservice logs 
+ IP address from node''s range      //kubectl get pod -o wide (ip address알수있다.)
+
+service communication : selector 
+which pods to forward the request to?
+-pods are identified via selectors 
+-key value pairs 
+-labels of pods 
+-random label names 
+-svc matches all 3 replica  서비스가 node들을 매치시킴 ->register as endpoints 타겟포트 기준으로 node를 매치시킴 
+-must match all the selectors 
+-k8s creates endpoint object ->same name as service 
+-keeps track of, which pods are the members/endpoints of the service 
+-service port is arbitrary 
+-targetPort must match the port, the container is listening at 
+
+node1 - cluseter ip  <- ingress 
+
+node1 -> 다른 cluster ip (selector)-> 다른 node3 
+-second container running for monitoring metrics 여러 포트넘버를 명시해줌 -> selector -> nodes 연결 
+
+-client wants to communicate with 1 specific pod directly 
+-pods want to talk directly with specific pod 
+-so , not randomly selected 
+use case : stateful applications, like databases (ex mysql, mongodb, elasticsearch)
+pod replicas are not identical
+-only master is allowed to write to DB 
+-How can clients know pod''s ip addresses ? 
+-client needs to figure out ip addresses of each pod 
+DNS lookup 
+-dns lookup for service -returns single ip address(clusterIP)
+-Set clusterIP to "none" - returns pod ip address instead 
+
+
+which port to forward it to? 
+
+-headless services
+-no cluster ip address is assigned 
+3.service type attributes 
+clusterIP ,NodePort, LoadBalancer
+
+clusterIP only accessible within cluster 
+external traffic has access to fixed port on each worker node 
+nodeport(30000-32767) targetport(clusterip port) port(pod port)
+clusterIP service is automatically created 
+cluster-ip:3200 , node-ip:30008 
+
+-nodeport services 
+
+-LoadBalancer services
+becomes accessible externally through cloud providers LoadBalancer
+nodeport and clusterIP service are created automatically
+targetport :3000(pods를 3000으로 모두 설정 ) nodeport :30010 targetport :클러스터ip 서비스 3200 설 정 
+LoadBalancer services is an extension of nodeport service 
+nodeport service is an extension of cluserIP service 
+
+nodeport service not for external connection 
+configure ingress or LoadBalancer for production environments
+
+
+each posd has its own ip address
+pods are ephemeral - are destroyed frequently 
+
+service: 
+-stable ip address 
+-LoadBalancing 
+-loose coupling 
+-within & outside cluster 
+
+
+
+
+==================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

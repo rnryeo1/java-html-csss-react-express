@@ -1,0 +1,96 @@
+<h1></h1> //제목h1
+
+<a href ="웹주소">도널드 커누스</a>
+
+<ul> unorder list
+<li></li> 각각의 항목들을 리스트로 표현
+</ul> //리스트가 ul에 묶여있다. 그룹핑기능이다.
+
+<ol> //li들을 순서로 묶음. order list
+<li></li>
+</ol>
+
+<title></title>//head 안에 넣도록 약속되어있다라고 생각하기
+
+<h1></h1>// h1 등등 body안에 
+
+DOCTYPE은 document type의 약어로, 웹 문서가 어떠한 형식으로 작성되었는지 최상단에 문서의 형식을 선언하는 것을 의미합니다
+
+<p></p>  //paragraph 단락 
+
+<br></br> 줄바꿈
+
+<td></td> 항목하나하나 table data의 약자 td
+<tr></tr> table row 약자
+<td></td>들을 tr로 묶어줘야한다.
+<table>은 td,tr 밖에 선언
+
+//==
+<thead></thead> 
+<tbody></tbody> 해도되고 안해도됨 브라우저가 알아서해줌.
+//==
+
+<thead>로 묶어줄경우 <tr>을 <th>로 바꿔줄수있다.
+
+<tfoot>으로 묶어줄경우 table 가장 아래쪽으로 내려감 .
+
+병합 rowspan 행병합, colspan  = "숫자" 열병합
+
+
+ //<form> 태그는 사용자로부터 입력을 받을 수 있는 HTLM 입력 폼(form)을 정의할 때 사용합니다.
+<form action = "http://localhost/login.php">  
+    <p>아이디: <input type ="text" name = "id"></p>
+    <p>비밀번호: <input type ="password" name="pwd"></p>
+    <p>주소: <input type ="text" name="address"></p>
+
+    <input type ="submit">
+
+</form>
+
+textarea탭 : 쓸수있는영역 만듬.
+
+<select>
+<option>1</option>
+<option>2</option>
+<option>3</option>
+
+</select>
+
+
+<input type="radio" name= "color" value="red" value="100" checked>
+
+
+<input type="button" value="버튼" onclick="alert('hello world')">
+
+<input type="hidden" name ="hide" value ="egoing"> // hidden ui가없지만 서버로 어떤값을 전송하고 싶을떄 쓴다.
+
+<label for="id_txt">text: </label>
+<input id="id_txt" type="text" name="id" value="default value"> 같은 id
+
+method="get" //전송방식의 방식 get, post 등등 
+get url 방식 post url 숨겨서 방식
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

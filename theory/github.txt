@@ -1,0 +1,43 @@
+github actions 
+
+java app with gradle -> docker image -> private repository
+(build artfact)         (build image)   (push docker repo)
+
+platform to automate developer workflows 
+CI/CD tool -> CI/CD is one of many workflows 
+
+nodejs app -> build docker image -> push to nexus repos -> deploy digitalocean server 
+java app with maven -> integration tests linux&windows -> build docker image -> push to aws repo -> deploy to aws eks 
+
+java app with gradle -> build docker image -> push to private repo
+
+syntax
+name [optional]
+on [required]
+jobs [required]
+..name of github event that triggers the workflow 
+-one or more jobs 
+-sequence of tasks (steps)
+-steps can run commands , setup tasks or run an action 
+
+
+steps[required]
+-can run commands, setup tasks or run an action 
+ uses -selects an action 
+ run - runs a command-line command
+
+-managed by github (but you can also host your own)
+-each job in a workflow runs in a fresh virtual environment
+
+runs in parallel by default 
+
+
+
+
+
+
+
+
+
+
+

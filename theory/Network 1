@@ -1,0 +1,268 @@
+ l1 : hw ,access ,mac주소
+ l3,l4: net ,sw ,transfort ,kernel ip주소 ,port 번호
+ tcp,ip
+ 소켓: tcp를 유저모드 application process 가 접근할수있도록 파일형태로 추상화한 인터페이스
+ l7: application, user
+
+
+mac,ip,port주소 : 식별자
+
+net-ip ->host식별자 :인터넷에 연결된 컴퓨터 
+전송-port process,service,인터페이스번호
+hw- mac (nic식별자) LAN카드 유선/무선 
+IP주소는 NIC 에 N개 바인딩 할수 있다.
+IP1,IP2...-> NIC
+
+host: 네트워크에 연결된 컴퓨터
+switch: network 자체를 이루는 컴퓨터라면 스위치라고 부른다
+network이용주체: endpoint, peer, server, client 
+
+router: 네트워크 자체를 이루고 있는 컴퓨터 
+internet: router + dns 의 집합체이다.
+
+mac address switch: l2 스위치 
+lp: l3 스위치
+port: l4 스위치
+http: l7스위치
+무엇으로 스위치하느냐가 정말 중요하다.
+tcp/ip :계층이달라서 / 들어간다
+
+
+======================================================================
+host 식별 :ip주소
+ipv4: 주소길이 :32bit
+ipv6: 주소길이 : 128bit
+
+2^32 = 43억
+2^8  = 8bit
+ip주소 : 8bit씩 끊어서 표시
+
+192.168.60.14 (netid ,3단위) ( host id, 1단위) netid, hostid 로 나뉜다.
+ip주소 = netid + host id 
+길이 32     24(netmask)+      (32-24)
+netmask : network id 의 길이를 나타낸다
+
+192.168.60.14 /24 (network id 길이 24)
+
+======================================================================
+port번호: process 식별자! ,service, interface -
+
+u : process  file :socket 에 들어가는번호가 port번호다  file에 attach
+k : tcp,ip ,driver
+hw : nic
+
+소켓이 파일같은건데 소켓에 attach 되는정보가 PORT번호이다.
+PORT번호는 기본적으로 16bit이다.
+경우의수가 2^16 인데 0~65535  // 0,65535는 안쓴다. 2^16-2개
+
+192.168.0.10 
+PORT번호는 프로세스 식별자다 절대 암기 
+NIC,ip,tcp 에서 올라가서-> Process로 갈건지,엣지,크롬 등등으로 갈건지 PORT번호로 결정한다
+
+======================================================================
+switch가 하는일은 switching 이다.
+Network -> 고속도로
+switching : 경로선택
+
+출발지 -> 이정표 -> 목적지
+A->B->E->D->목 
+교차로(스위치) 어떻게 최적경로로 갈 수 있을까
+internet = router의 집합체 router는 l3이다. 교차로==router이다
+이정표(라우팅 테이블*****)
+======================================================================
+데이터 단위 packet
+TCP segment
+IP packet 크기 1500bytes
+NIC, driver frame
+File 의 stream data -> 자르기 -> segment 
+
+
+stream -> segment -> packet -> frame 순서
+Maximun segment size
+암기
+======================================================================
+네트워크 인터페이스 선택 원리와 기준
+
+인터넷 NIC 유선, 무선 ->크롬 socket ->TCP IP 바인딩 -> 
+socket 연결될때 
+유선 1.1.1.1 무선 2.2.2.2일때 
+Chrome 유,무선 둘중 어디로 갈까?
+interface가 여러개일때 어디로 갈까?
+어떻게결정될까?
+여러가지가 있는데 메트릭값(비용)으로 결정됨 
+
+
+======================================================================
+초창기 웹 서비스 구조
+html + http == web
+문서-> 자료구조 -> ui,제어
+
+web(browser)client - internet - web server
+web(browser)client -> tcp연결 ->http통신(stateless*****) -> web server
+
+get (read)
+url -> dns -> url주소 -> html이 구문분석해서 ->자료구조(비선형) DOM -> 렌더링
+구문분석, 렌더링이 핵심 
+원격지 문서뷰어
+======================================================================
+웹 서비스 3대 요소
+렌더링(CSS)
+HTML ,문서이다.
+
+양방향상호작용 -> 문맥(상태->전이)-> POST -> 처리 (연산) ->기억->DATABASE로
+client기억 -> 쿠키
+======================================================================
+LAN과 WAN을 구별하는 방법
+
+logical == virtual
+ip -> internet - > logical -> virtual 인터넷은 논리적 네트워크이다  ->WAN
+
+물리네트워크 -> LAN -> MAC주소 48bit 
+특수주소 ->방송주소(Broadcast)->LAN
+
+======================================================================
+패킷의 생성 원리와 캡슐화
+소켓(파일의일종): tcp를  유저모드 어플리케이션 이접근할수잇도록 추상화한 인터페이스
+file : stream 단위
+tcp를 만나면 분해가 일어남 - > segment -> packet -> frame 
+send하는순간 분해가 알아서 일어난다.
+
+packet(1500bytes) header ,payload 로 나뉜다.
+header(ip/tcp/l3,l4) 20,20  payload 1460 
+
+header (ip,tcp 20,20 택배 송장이라고 생각)
+payload (1460) 안을들여다볼때 DPI라고한다.
+
+프로세스가 소켓에 입출력 -> stream ->segment 내용물이라고 한다 -> packet
+
+send함수 ("  ~~~"); -> 2000 한번에 보낼순없어서 2개로 나눠야할경우가 생김.
+
+
+======================================================================
+L2 스위치에 대해서
+
+l2 (mac address)
+Network (switch의 집합체이다.)
+
+PC1->NIC-> L2 access(가장endpoint와 맞닿아있는것) -> L2 Distribution (스위치를위한 스위치) -> 라우터(건물한개라고생각) L3->인터넷 
+이용주체(endpoint)
+
+L2 Distribution: L2 access 와 맞닿아있는것
+
+L2 access -> uplink(선) -> L2 Distribution
+
+link up 연결
+link down( 연결다운됨)
+
+======================================================================
+IP헤더 형식과 의미 요약
+header  payload 1460
+tcp20 ip20 
+
+단편화 1500넘어가면/2 -> 2번 보내기->
+router->packet유통->
+router지날때마다 TTL 1씩 감소 ->0되면 패킷버림
+
+Wireshark 필수
++filter 
+1hexa 16진수친해지기
+2정규표현식
+
+======================================================================
+Wireshark의 내부구조와 작동원리
+
+socket : stream
+tcp: segment MSS
+ip : packet MTM filter->sensor(수집)(bypass, drop) ->npcap->디코딩(analyzer or snipper)
+nic : frame (outbound, inbound)
+
+port mirroring : l2스위치에서 특정 port로 copy를떠주는데 원본과 사본이동일할경우 
+미러링한것을 읽기전용으로 읽는게 sensor-> 용도 ,장애, DPI->IDS(탐지) 읽기만하는것 (OUT OF PATH 는 sensor) 과속감시카메라라고 생각 (인지만가능)
+라우터나 방화벽은 inline으로 가는것!!
+======================================================================
+Inline 구조와 Out of path 구조
+
+packet을 다룬다.
+라우터 lnline 톨게이트
+net->고속도로
+
+pc->internet->naver
+3.3.3.3->internet -> 5.5.5.5 
+
+p1 3.3.3.3 ->pc2 ->proxy(대리자)-> 5.5.5.5
+
+proxy socket1, socket2 는 socket stream
+Inline , out of path 는 packet
+
+======================================================================
+Proxy의 활용 첫 번째. '우회'
+3.3.3.3->proxy9.9.9.9-> internet(http web) -> naver 5.5.5.5
+ proxy에서 모든내용을 읽을수있다(단점)
+
+======================================================================
+이해하면 인생이 바뀌는 TCP 송/수신 원리
+
+client -> l2 ->router ->internet -> r -> server
+
+tcp/ip연결 ->3 -way handshake
+
+server(web, socket(file))process R(receive)W(send)X 
+
+HDD <- File
+데이터를 64kb 읽어봐서 ->메모리(buffer)에 적재함 read해서 
+소켓은 tcp,ip를 추상화한것 ->소켓에서 분해일어나서 
+user mode memory ->copy-> tcp,ip 계층 buffer에 복사됨 -> h/w nic 계층의 segment로 잘라냄 
+ -> frame -> frame 에서 박스뜯어서 frame없어지고 -> packet -> segment -> tcp buffer -> file io buffer -> 
+ 1,2번 보내고 -> 1,2번 받고 wait ack -> 를 기다림 받으면 3번을 보냄
+
+tcp ip buffer size : window size 라고한다.
+ack에 window size 를 포함한다. 
+window size 가 여유가 없으면 보내지 않는다.->  수신측의 window size > MSS(지금보내려는게) ? 보내고 : WAIT(WINDOW SIZE가 작을시)
+
+process에서  read속도 > net수신 속도*****
+read속도가 더느리다면 net에서 windowsize 버퍼가 쌓인다.
+이경우 프로그램에서 read속도를 해결해야한다.
+read속도를 늘려야한다.
+
+
+======================================================================
+global ip 만 router가 routing 해준다. 인터넷에서 글로벌 ip가 같은것은 없다.
+private ip 작은 소규모 ,인터넷을 구축 
+공유기 : 글로벌 ip 를 공유해준다. ip주소를 공유해준다. 
+
+127.0.0.1 :라우팅이 밖으로 나가지 않게 해놨음.
+
+process A  127.0.0.1(client)  process b(server )//혼자컴퓨터켜놓고 공부할경우. 이경우 라우팅이 밖으로 안나가게 해놨음.
+루프백주소(127.0.0.1)이란 h/w로 나가지 못하는 주소이다
+밖으로 나가지못한다 ip로 나가다 다시 돌아온다.
+global 주소라면 h/w nic로 나가겠지 -> router-> 다른컴퓨터로
+======================================================================
+전세계 인터넷을 멈추는 방법과 DNS
+internet = router +DNS 분산형 DB
+계층적구조 ROOT DNS *13 대 
+
+DNS 도메인네임(WWW(host name).naver(www는네이버에속하고).com(www.naver는 .com에 속한다))
+host -> id 주소 
+도메인네임-> ip 주소 (ip주소 잘못외워서)
+www.naver.com-> 1.dns cache 검색->2.host file 검색 -> root dns -> *.com : dns 목록 ->.com이 알려줌 -> dns 
+
+======================================================================
+MTU와 Packet 단편화
+MTU 1500
+MSS MTU-20-20
+
+1500 보냈을때: 
+PC1 MTU:1500 -> R1 -> R2 (MTU :1400) - > R3 -> SERVER
+
+100만큼을 COPY 해서 새로 IP헤더를더해서 붙여줌
+OFFSET : 1000
+1개의 패킷이었는데 2개로 분할됨.
+분할 -> 재조립->수신하는쪽에서 하게되있다. 그래서 단편화는 안하는게 좋다. 조립떄문에
+
+VPN(IPSEC)떄문에 발생할 가능성이 있다.
+
+하향평준화: 보내는PC에서 1400으로 100줄여서 하향평준화
+BPS(데이터양) VS PPS(PACKET 개수 PPS를 떻어뜨리는게 중요하다) 
+
+
+

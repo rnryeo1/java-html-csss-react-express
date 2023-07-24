@@ -1,0 +1,62 @@
+docker run options:
+expose port 8080 -> by default runs on that port 
+expose port 50000 -> master / slave communication 
+Run in detached mode -> run container in background 
+bind named volume -> persist data of jenkins 
+-docker run -p 8080:8080 -p 50000:50000 -d -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts
+branch source = project you want to build 
+git 주소 적어준다.
+
+credential scopes 
+system -> only available on jenkins server 
+id = reference for your credentials
+
+credentials
+-on the main page 
+-on the pipeline page 
+
+required fields of jenkinsfile 
+-pipeline must be top-level 
+-agent -where to execute 
+-stages -where to work happens 
+-stage and steps 
+
+commit -> git repo -> trigger build ->
+
+2ways to trigger build 
+1. push notification : version control notifies jenkins on new commit 
+2. polling jenkins polls in regular intervalls 
+
+trigger build 
+1.install jenkins plugin based on your version control system
+2.configure repository server hostname 
+3.and access token or credential
+
+developer -> commit -> gitlab -> jenkins webhook url 
+
+jenkins -> polls every 1min-> gitlab 
+
+-develop your application 
+-jenkins should build and package that app-> you need a build tool available on jenkins
+4 main build tools 
+backend: maven , gradle 
+frontend: npm ,yarn
+
+what is jenkinsfile?
+-scripted pipeline
+-is created in your repository
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
